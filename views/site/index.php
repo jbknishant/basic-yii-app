@@ -7,7 +7,10 @@ $this->title = 'My Basic Yii Application';
 <div class="site-index">
 
     <div class="jumbotron text-center bg-transparent mt-5 mb-5">
-        <h1 class="display-4">Congratulations!</h1>
+        <?= Yii::$app->user->isGuest
+            ? '<h1 class="display-4">Welcome Guest!</h1>'
+            : '<h1 class="display-4">Welcome ' . Yii::$app->user->identity->name . '</h1>'
+        ?>
 
         <p class="lead">You have successfully created your Yii-powered application.</p>
 
