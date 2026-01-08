@@ -36,12 +36,24 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
         'brandUrl' => Yii::$app->homeUrl,
         'options' => ['class' => 'navbar-expand-md navbar-dark bg-dark fixed-top']
     ]);
+
+    // Menu items
     echo Nav::widget([
         'options' => ['class' => 'navbar-nav'],
         'items' => [
             ['label' => 'Home', 'url' => ['/site/index']],
             ['label' => 'About', 'url' => ['/site/about']],
             ['label' => 'Contact', 'url' => ['/site/contact']],
+            Yii::$app->user->isGuest
+                ? ''
+                : ['label' => 'Users', 'url' => ['/user/user/index']],
+        ]
+    ]);
+
+    //right side(auth)
+    echo Nav::widget([
+        'options' => ['class' => 'navbar-nav ms-auto'],
+        'items' => [
             Yii::$app->user->isGuest
                 ? ['label' => 'Register', 'url' => ['/user/auth/register']]
                 : '',
@@ -50,12 +62,12 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
                 : '<li class="nav-item">'
                     . Html::beginForm(['/user/auth/logout'])
                     . Html::submitButton(
-                        'Logout (' . Yii::$app->user->identity->email . ')',
+                        'Logout (' . Yii::$app->user->identity->name . ')',
                         ['class' => 'nav-link btn btn-link logout']
                     )
                     . Html::endForm()
-                    . '</li>'
-        ]
+                    . '</li>',
+        ],
     ]);
     NavBar::end();
     ?>

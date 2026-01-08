@@ -18,6 +18,8 @@ use yii\web\IdentityInterface;
  */
 class User extends ActiveRecord implements IdentityInterface
 {
+    public $confirm_password;
+    private $_oldPasswordHash;
     public static function tableName(): string
     {
         return '{{%user}}';
@@ -26,10 +28,27 @@ class User extends ActiveRecord implements IdentityInterface
     public function rules(): array
     {
         return [
-            [['name', 'email', 'password'], 'required'],
+            [['name', 'email'], 'required'],
             ['email', 'email'],
-            ['email', 'unique'],
+            [
+                'email',
+                'unique',
+                'targetClass' => self::class,
+                'message' => 'This email address has already been taken.',
+                'on' => ['create', 'update'],
+                'filter' => function ($query) {
+                    if (!$this->isNewRecord) {
+                        $query->andWhere(['<>', 'id', (int)$this->id]);
+                    }
+                },
+            ],
             [['created_at', 'updated_at'], 'integer'],
+
+            // Password rules (on create or on update when filled)
+            [['password', 'confirm_password'], 'required', 'on' => 'create'],
+            [['password', 'confirm_password'], 'safe', 'on' => 'update'],
+            ['password', 'string', 'min' => 5],
+            ['confirm_password', 'compare', 'compareAttribute' => 'password', 'skipOnEmpty' => true,],
         ];
     }
 
@@ -92,6 +111,37 @@ class User extends ActiveRecord implements IdentityInterface
         }
 
         $this->updated_at = time();
+
+        // Handle password change on update
+        if($this->scenario === 'update') {
+            if(!empty($this->password)) {
+                $this->password = Yii::$app->security
+                ->generatePasswordHash($this->password);
+            }else {
+                // No new password → keep old hash
+                $this->password = $this->_oldPasswordHash;
+            }
+        }
         return parent::beforeSave($insert);
+    }
+
+    public function afterFind()
+    {
+        parent::afterFind();
+
+        // Store existing password hash
+        $this->_oldPasswordHash = $this->password;
+    }
+
+
+    // Scenarios
+    public function scenarios()
+    {
+        $scenarios = parent::scenarios();
+
+        $scenarios['create'] = ['name', 'email', 'password', 'confirm_password'];
+        $scenarios['update'] = ['name', 'email', 'password', 'confirm_password'];
+
+        return $scenarios;
     }
 }
