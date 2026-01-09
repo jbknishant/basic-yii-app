@@ -13,15 +13,51 @@ $config = [
         '@npm'   => '@vendor/npm-asset',
         '@tests' => '@app/tests',
     ],
+    'modules' => [
+        'user' => [
+            'class' => 'app\modules\user\Module',
+        ],
+    ],
     'components' => [
         'cache' => [
             'class' => 'yii\caching\FileCache',
         ],
+        'mailer' => [
+            'class' => 'yii\swiftmailer\Mailer',
+            'viewPath' => '@app/modules/user/mail',
+            'useFileTransport' => false,
+
+            // local test configuration
+            // 'transport' => [
+            //     'dsn' => 'smtp://user:pass@smtp.example.com:465',
+            // ],
+            // live test configuration
+            'transport' => [
+                'class' => 'Swift_SmtpTransport',
+                'host' => 'live.smtp.mailtrap.io',
+                'username' => 'api',
+                'password' => 'e965516a326d746c0d820ed1b22026d5',
+                'port' => '587',
+                'encryption' => 'tls',
+            ],
+        ],
         'log' => [
             'targets' => [
                 [
+                    'class' => yii\log\FileTarget::class,
+                    'categories' => ['user-cron-success'],
+                    'levels' => ['info'],
+                    'logFile' => '@runtime/logs/user-cron-success.log',
+                ],
+                [
+                    'class' => yii\log\FileTarget::class,
+                    'categories' => ['user-cron-failed', 'user-cron-error'],
+                    'levels' => ['error'],
+                    'logFile' => '@runtime/logs/user-cron-failed.log',
+                ],
+                [
                     'class' => 'yii\log\FileTarget',
-                    'levels' => ['error', 'warning'],
+                    'levels' => ['warning'],
                 ],
             ],
         ],

@@ -35,7 +35,16 @@ $config = [
             'class' => \yii\symfonymailer\Mailer::class,
             'viewPath' => '@app/mail',
             // send all mails to a file by default.
-            'useFileTransport' => true,
+            'useFileTransport' => false,
+            'transport' => [
+                'dsn' => 'smtp://7f6103a122c301:****783a@sandbox.smtp.mailtrap.io:2525',
+                'scheme' => 'smtp',
+                'host' => 'sandbox.smtp.mailtrap.io',
+                'username' => '7f6103a122c301',
+                'password' => '****783a',
+                'port' => '2525',
+                // 'encryption' => 'tls',
+            ],
         ],
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
